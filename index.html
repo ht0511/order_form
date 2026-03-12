@@ -193,7 +193,7 @@ Phí ship thường khoảng <b>14.000đ / kg</b> (có thể thay đổi tùy đ
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbxZNmHRSSt4QZSwug1tbjstcSnTy_Bl1wwij74py-Z0M45ZLtxT25RmFVBMNUllZyXv/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbyeiIc_jcAPBnhBF7ITsUtPqtRIznvGcw2GVSVo4z1fj11TMj3EKM8fJ7E-pRBb77Y/exec";
 
 let provincesData=[];
 
@@ -289,7 +289,11 @@ payment:payment.value
 
 const res=await fetch(API_URL,{
 method:"POST",
-body:JSON.stringify(data)
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data),
+mode:"cors"
 });
 
 const result=await res.json();
@@ -309,3 +313,4 @@ loadAddress();
 </body>
 
 </html>
+
