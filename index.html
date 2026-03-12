@@ -274,41 +274,31 @@ async function submitForm(){
 
 const formData=new FormData();
 
-formData.append("name",name.value);
-formData.append("phone",phone.value);
-formData.append("province",province.value);
-formData.append("district",district.value);
-formData.append("ward",ward.value);
-formData.append("address",address.value);
-formData.append("source",source.value);
-formData.append("account",account.value);
-formData.append("total",total.value);
-formData.append("paid",paid.value);
-formData.append("remain",remain.innerText);
-formData.append("payment",payment.value);
+formData.append("name",document.getElementById("name").value);
+formData.append("phone",document.getElementById("phone").value);
+formData.append("province",document.getElementById("province").value);
+formData.append("district",document.getElementById("district").value);
+formData.append("ward",document.getElementById("ward").value);
+formData.append("address",document.getElementById("address").value);
+formData.append("source",document.getElementById("source").value);
+formData.append("account",document.getElementById("account").value);
+formData.append("total",document.getElementById("total").value);
+formData.append("paid",document.getElementById("paid").value);
+formData.append("remain",document.getElementById("remain").innerText);
+formData.append("payment",document.getElementById("payment").value);
 
-const res=await fetch(API_URL,{
+await fetch(API_URL,{
 method:"POST",
-body:formData
+body:formData,
+mode:"no-cors"
 });
 
-const text=await res.text();
-
-try{
-
-const result=JSON.parse(text);
+const phone=document.getElementById("phone").value.replace(/\D/g,'');
+const last6=phone.slice(-6);
 
 document.getElementById("formCard").style.display="none";
-
 document.getElementById("successCard").style.display="block";
-
-document.getElementById("orderId").innerText=result.orderId;
-
-}catch{
-
-alert("Đã gửi thông tin thành công");
-
-}
+document.getElementById("orderId").innerText="OD-"+last6;
 
 }
 
@@ -319,5 +309,6 @@ loadAddress();
 </body>
 
 </html>
+
 
 
