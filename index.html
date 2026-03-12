@@ -1,294 +1,153 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Xác nhận thông tin nhận hàng</title>
-
-
-<style>
-  
-body{
-font-family: Arial, sans-serif;
-background:#f1f5f9;
-margin:0;
-padding:30px 15px;
-}
-
-.container{
-max-width:520px;
-margin:auto;
-}
-
-.card{
-background:white;
-padding:28px;
-border-radius:16px;
-box-shadow:0 12px 35px rgba(0,0,0,0.1);
-}
-
-h2{
-text-align:center;
-margin-bottom:5px;
-}
-
-.desc{
-text-align:center;
-font-size:14px;
-color:#666;
-margin-bottom:25px;
-}
-
-label{
-font-weight:600;
-font-size:14px;
-}
-
-input,select{
-width:100%;
-padding:13px;
-border-radius:10px;
-border:1px solid #ddd;
-margin-top:6px;
-margin-bottom:15px;
-font-size:14px;
-}
-
-.note{
-background:#f8fafc;
-padding:12px;
-border-radius:8px;
-font-size:13px;
-color:#555;
-margin-bottom:18px;
-}
-
-.total-box{
-background:#eef2ff;
-padding:14px;
-border-radius:10px;
-margin-bottom:18px;
-font-size:15px;
-font-weight:600;
-text-align:center;
-}
-
-button{
-width:100%;
-padding:15px;
-background:#2563eb;
-color:white;
-border:none;
-border-radius:10px;
-font-size:16px;
-cursor:pointer;
-}
-
-button:hover{
-background:#1e40af;
-}
-
-.success{
-display:none;
-text-align:center;
-}
-
-.order-id{
-font-size:20px;
-font-weight:bold;
-color:#2563eb;
-margin-top:10px;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Xác nhận thông tin nhận hàng</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 20px 10px; }
+        .container { max-width: 500px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h2 { text-align: center; margin-top: 0; color: #1e293b; }
+        .desc { text-align: center; font-size: 14px; color: #64748b; margin-bottom: 20px; }
+        label { font-weight: 600; font-size: 13px; color: #334155; display: block; margin-top: 12px; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 5px; box-sizing: border-box; font-size: 14px; }
+        .total-box { background: #eff6ff; padding: 15px; border-radius: 10px; margin: 15px 0; font-weight: 600; text-align: center; color: #1d4ed8; border: 1px dashed #3b82f6; }
+        button { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; }
+        button:hover { background: #1d4ed8; }
+        .success { display: none; text-align: center; padding: 40px 20px; }
+        .order-id { font-size: 24px; font-weight: 800; color: #2563eb; margin: 15px 0; letter-spacing: 1px; }
+        .note { font-size: 12px; color: #64748b; margin-top: 10px; font-style: italic; }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
+    <div class="card" id="formCard">
+        <h2>Xác nhận nhận hàng</h2>
+        <p class="desc">Vui lòng điền thông tin chính xác</p>
 
-<div class="card" id="formCard">
+        <form id="orderForm" action="LINK_WEB_APP_CUA_BAN" method="POST" target="hidden_iframe" onsubmit="handleSubmit()">
+            
+            <label>Họ và tên</label>
+            <input name="name" id="name" placeholder="Nguyễn Văn A" required>
 
-<h2>Xác nhận thông tin nhận hàng</h2>
+            <label>Số điện thoại</label>
+            <input name="phone" id="phone" type="tel" placeholder="090..." required>
 
-<p class="desc">
-Vui lòng điền chính xác để shop gửi hàng
-</p>
-<form
-<form
-action="https://script.google.com/macros/s/XXXX/exec"
-method="POST">
-  
-<label>Họ và tên</label>
-<input id="name">
+            <label>Tỉnh / Thành phố</label>
+            <select name="province" id="province" required><option value="">Chọn tỉnh</option></select>
 
-<label>Số điện thoại</label>
-<input id="phone">
+            <label>Quận / Huyện</label>
+            <select name="district" id="district" required><option value="">Chọn huyện</option></select>
 
-<label>Tỉnh / Thành</label>
-<select id="province"></select>
+            <label>Phường / Xã</label>
+            <select name="ward" id="ward" required><option value="">Chọn xã</option></select>
 
-<label>Quận / Huyện</label>
-<select id="district"></select>
+            <label>Địa chỉ chi tiết (Số nhà, đường...)</label>
+            <input name="address" id="address" placeholder="123 Đường ABC..." required>
 
-<label>Phường / Xã</label>
-<select id="ward"></select>
+            <label>Nguồn liên hệ</label>
+            <select name="source">
+                <option>Facebook</option>
+                <option>Zalo</option>
+            </select>
 
-<label>Địa chỉ chi tiết</label>
-<input id="address">
+            <label>Tên tài khoản (Facebook/Zalo)</label>
+            <input name="account" placeholder="Tên nick của bạn">
 
-<label>Bạn đã inbox qua đâu</label>
-<select id="source">
-<option>Facebook</option>
-<option>Zalo</option>
-</select>
+            <label>Tổng đơn hàng (VNĐ)</label>
+            <input name="total" id="total" type="number" placeholder="500000" oninput="calcRemain()">
 
-<label>Tên account đã inbox</label>
-<input id="account">
+            <label>Đã chuyển khoản (VNĐ)</label>
+            <input name="paid" id="paid" type="number" placeholder="0" oninput="calcRemain()">
 
-<label>Tổng tiền đơn hàng</label>
-<input id="total" type="number" oninput="calcRemain()">
+            <div class="total-box">
+                Còn lại: <span id="remain">0</span> VNĐ
+            </div>
 
-<label>Số tiền đã chuyển khoản</label>
-<input id="paid" type="number" oninput="calcRemain()">
+            <label>Thanh toán phần còn lại qua</label>
+            <select name="payment">
+                <option>COD (Nhận hàng trả tiền)</option>
+                <option>Chuyển khoản nốt</option>
+            </select>
 
-<div class="note">
-Shop sẽ kiểm tra lại giao dịch. Vui lòng nhập đúng số tiền đã chuyển.
+            <button type="submit" id="submitBtn">Xác nhận gửi đơn</button>
+            <p class="note">* Shop sẽ liên hệ lại để xác nhận trước khi gửi.</p>
+        </form>
+    </div>
+
+    <div class="card success" id="successCard">
+        <div style="font-size: 50px;">✅</div>
+        <h2>Gửi thành công!</h2>
+        <p>Mã đơn hàng của bạn là:</p>
+        <div class="order-id" id="displayOrderId"></div>
+        <p style="color: #64748b;">Vui lòng chụp ảnh màn hình hoặc lưu lại mã này.</p>
+        <button onclick="location.reload()" style="background: #64748b;">Quay lại</button>
+    </div>
 </div>
 
-<div class="total-box">
-Số tiền còn lại: <span id="remain">0</span> VNĐ
-</div>
-
-<label>Phương thức thanh toán phần còn lại</label>
-<select id="payment">
-<option>COD (Thanh toán khi nhận hàng)</option>
-<option>Chuyển khoản</option>
-</select>
-
-<div class="note">
-Phí ship thường khoảng <b>14.000đ / kg</b> (có thể thay đổi tùy đơn vị vận chuyển).
-</div>
-
-<button type="submit">Xác nhận thông tin</button>
-
-</div>
-
-
-<div class="card success" id="successCard">
-
-<h2>Đã gửi thông tin!</h2>
-
-<p>Mã đơn của bạn:</p>
-
-<div class="order-id" id="orderId"></div>
-
-<p>Vui lòng lưu mã này để tra cứu vận đơn.</p>
-
-</div>
-
-</div>
-
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
 <script>
+    // 1. Xử lý API Tỉnh/Thành
+    let provincesData = [];
+    async function loadAddress() {
+        try {
+            const res = await fetch("https://provinces.open-api.vn/api/?depth=3");
+            provincesData = await res.json();
+            const provinceSelect = document.getElementById("province");
+            provincesData.forEach(p => {
+                let opt = new Option(p.name, p.name);
+                provinceSelect.add(opt);
+            });
+        } catch (e) { console.error("Lỗi tải địa chỉ"); }
+    }
 
-const API_URL="https://script.google.com/macros/s/AKfycbwLuKR1Tj7BqWYWLlofxiUol7Nj_9Cn6Jx-SVgcRvkMc3zaH2pKutQJfKohfLiTqXSD/exec";
+    document.getElementById("province").onchange = function() {
+        const districtSelect = document.getElementById("district");
+        const wardSelect = document.getElementById("ward");
+        districtSelect.innerHTML = '<option value="">Chọn huyện</option>';
+        wardSelect.innerHTML = '<option value="">Chọn xã</option>';
+        
+        const p = provincesData.find(x => x.name === this.value);
+        if (p) p.districts.forEach(d => districtSelect.add(new Option(d.name, d.name)));
+    };
 
-let provincesData=[];
+    document.getElementById("district").onchange = function() {
+        const wardSelect = document.getElementById("ward");
+        wardSelect.innerHTML = '<option value="">Chọn xã</option>';
+        const p = provincesData.find(x => x.name === document.getElementById("province").value);
+        const d = p.districts.find(x => x.name === this.value);
+        if (d) d.wards.forEach(w => wardSelect.add(new Option(w.name, w.name)));
+    };
 
-async function loadAddress(){
+    // 2. Tính số tiền còn lại
+    function calcRemain() {
+        const total = parseFloat(document.getElementById("total").value) || 0;
+        const paid = parseFloat(document.getElementById("paid").value) || 0;
+        document.getElementById("remain").innerText = (total - paid).toLocaleString();
+    }
 
-const res=await fetch("https://provinces.open-api.vn/api/?depth=3");
+    // 3. Xử lý khi nhấn Submit
+    function handleSubmit() {
+        const btn = document.getElementById("submitBtn");
+        const phone = document.getElementById("phone").value;
+        const orderId = "OD-" + phone.slice(-6);
 
-provincesData=await res.json();
+        btn.innerText = "Đang xử lý...";
+        btn.disabled = true;
 
-const province=document.getElementById("province");
+        // Chuyển giao diện sau 1.5 giây (để form kịp gửi vào iframe)
+        setTimeout(() => {
+            document.getElementById("formCard").style.display = "none";
+            document.getElementById("successCard").style.display = "block";
+            document.getElementById("displayOrderId").innerText = orderId;
+        }, 1500);
+    }
 
-province.innerHTML="<option>Chọn tỉnh</option>";
-
-provincesData.forEach(p=>{
-const option=document.createElement("option");
-option.value=p.name;
-option.text=p.name;
-province.appendChild(option);
-});
-
-}
-
-document.getElementById("province").addEventListener("change",function(){
-
-const province=this.value;
-
-const district=document.getElementById("district");
-district.innerHTML="<option>Chọn quận</option>";
-
-const ward=document.getElementById("ward");
-ward.innerHTML="<option>Chọn phường</option>";
-
-const p=provincesData.find(x=>x.name===province);
-
-p.districts.forEach(d=>{
-const option=document.createElement("option");
-option.value=d.name;
-option.text=d.name;
-district.appendChild(option);
-});
-
-});
-
-document.getElementById("district").addEventListener("change",function(){
-
-const province=document.getElementById("province").value;
-
-const district=this.value;
-
-const ward=document.getElementById("ward");
-ward.innerHTML="<option>Chọn phường</option>";
-
-const p=provincesData.find(x=>x.name===province);
-
-const d=p.districts.find(x=>x.name===district);
-
-d.wards.forEach(w=>{
-const option=document.createElement("option");
-option.value=w.name;
-option.text=w.name;
-ward.appendChild(option);
-});
-
-});
-
-function calcRemain(){
-
-const total=parseFloat(document.getElementById("total").value)||0;
-const paid=parseFloat(document.getElementById("paid").value)||0;
-
-const remain=total-paid;
-
-document.getElementById("remain").innerText=remain.toLocaleString();
-
-}
-
-loadAddress();
-
+    loadAddress();
 </script>
-
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
