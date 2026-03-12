@@ -193,7 +193,7 @@ Phí ship thường khoảng <b>14.000đ / kg</b> (có thể thay đổi tùy đ
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbyeiIc_jcAPBnhBF7ITsUtPqtRIznvGcw2GVSVo4z1fj11TMj3EKM8fJ7E-pRBb77Y/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbzN21zS9AvGcJHlXycPCaklcsL8dx44Z5i7KIENf_XPtxVnlkiHe4kPcky5fLlDxvKh/exec";
 
 let provincesData=[];
 
@@ -272,37 +272,43 @@ document.getElementById("remain").innerText=remain.toLocaleString();
 
 async function submitForm(){
 
-const data={
-name:name.value,
-phone:phone.value,
-province:province.value,
-district:district.value,
-ward:ward.value,
-address:address.value,
-source:source.value,
-account:account.value,
-total:total.value,
-paid:paid.value,
-remain:remain.innerText,
-payment:payment.value
-};
+const formData=new FormData();
+
+formData.append("name",name.value);
+formData.append("phone",phone.value);
+formData.append("province",province.value);
+formData.append("district",district.value);
+formData.append("ward",ward.value);
+formData.append("address",address.value);
+formData.append("source",source.value);
+formData.append("account",account.value);
+formData.append("total",total.value);
+formData.append("paid",paid.value);
+formData.append("remain",remain.innerText);
+formData.append("payment",payment.value);
 
 const res=await fetch(API_URL,{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify(data),
-mode:"cors"
+body:formData
 });
 
-const result=await res.json();
+const text=await res.text();
+
+try{
+
+const result=JSON.parse(text);
 
 document.getElementById("formCard").style.display="none";
 
 document.getElementById("successCard").style.display="block";
 
 document.getElementById("orderId").innerText=result.orderId;
+
+}catch{
+
+alert("Đã gửi thông tin thành công");
+
+}
 
 }
 
@@ -313,4 +319,5 @@ loadAddress();
 </body>
 
 </html>
+
 
