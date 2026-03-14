@@ -169,7 +169,7 @@
         const paid = parseFloat(document.getElementById("paid").value) || 0;
         const remainWithShip = total > 0 ? (total - paid) + SHIP_FEE : 0;
         const phone = document.getElementById("phone").value;
-        const orderId = phone.length >= 6 ? "OD-" + phone.slice(-6) : "OD-" + phone;
+        const orderId = phone.length >= 6 ? "OD" + phone.slice(-6) : "OD" + phone;
         const source = document.getElementById("source").value;
         const prefix = (source === "Facebook") ? "FB" : (source === "Zalo" ? "ZL" : "");
         let accName = removeVietnameseTones(document.getElementById("account").value);
@@ -250,7 +250,7 @@
         const remain = document.getElementById("remain_text").innerText;
         const note = document.getElementById("note").value;
 
-        const orderId = "OD-" + phone.slice(-6);
+        const orderId = "OD" + phone.slice(-6);
         document.getElementById("displayOrderId").innerText = orderId;
         
         let paymentInfo = "";
