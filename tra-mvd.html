@@ -10,8 +10,8 @@
         .card { background: white; padding: 30px 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
         h2 { margin-top: 0; color: #1e293b; font-weight: 800; }
         .desc { font-size: 14px; color: #64748b; margin-bottom: 25px; }
-        input { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 16px; outline: none; text-align: center; font-weight: 600; text-transform: uppercase; margin-bottom: 15px; }
-        input:focus { border-color: #2563eb; }
+        input { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; font-size: 16px; outline: none; text-align: center; font-weight: 600; text-transform: uppercase; }
+        .note-mvd { font-size: 11px; color: #2563eb; margin-top: 8px; margin-bottom: 20px; font-style: italic; font-weight: 500; }
         button { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; }
         button:hover { background: #1d4ed8; }
         button:disabled { background: #94a3b8; cursor: not-allowed; }
@@ -22,38 +22,43 @@
         .result-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
         .tracking-code { font-size: 24px; font-weight: 800; color: #2563eb; margin: 10px 0; }
         .copy-btn { padding: 8px 15px; background: #e2e8f0; color: #475569; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; font-weight: 600; }
-        .copy-btn:hover { background: #cbd5e1; }
-        
-        /* Box thông tin đơn hàng */
         .order-info-box { background: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #bfdbfe; text-align: left; font-size: 14px; line-height: 1.6; margin: 15px 0; color: #334155; }
         .highlight-money { color: #dc2626; font-weight: bold; font-size: 15px; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>📦 Tra Cứu Vận Đơn</h2>
-        <p class="desc">Nhập mã đơn hàng của bạn (VD: OD-123456) để xem mã vận chuyển.</p>
+        <h2>📦 Tra Cứu Đơn Hàng</h2>
+        <p class="desc">Vui lòng nhập mã đơn để xem trạng thái vận chuyển</p>
         
-        <input type="text" id="orderInput" placeholder="Nhập mã đơn hàng...">
+        <input type="text" id="orderInput" placeholder="VD: OD-123456">
+        <div class="note-mvd">Mã đơn của bạn là: OD- + 6 số cuối SĐT</div>
+        
         <button id="searchBtn" onclick="performSearch()">Tra cứu ngay</button>
 
         <div id="resultBox"></div>
+        
+        <a href="index.html" style="display: block; margin-top: 20px; font-size: 13px; color: #64748b; text-decoration: none;">← Quay lại trang đặt hàng</a>
     </div>
 
     <script>
-        // Link API của bạn
-        const API_URL = "https://script.google.com/macros/s/AKfycbyazgVzVOl6lCjFNzJBgCv72IwEGAW1mwvLq1L6rLWlzvjjgru5_dvY6877hdI06uBZ/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxelLVJrjNkJ1Zj4rRyBKATvI1WNWh3e8JfpsMN5P7494MYIIvawUJ1FoI7MEN_B-vZ/exec";
 
         async function performSearch() {
             const inputEle = document.getElementById('orderInput');
             const btnEle = document.getElementById('searchBtn');
             const resultBox = document.getElementById('resultBox');
-            const maDon = inputEle.value.trim();
+            let maDon = inputEle.value.trim().toUpperCase();
 
             if (!maDon) {
                 alert("Vui lòng nhập mã đơn hàng!");
-                inputEle.focus();
                 return;
+            }
+            
+            // Tự động thêm OD- nếu khách chỉ nhập số
+            if (!maDon.startsWith("OD-")) {
+                maDon = "OD-" + maDon;
+                inputEle.value = maDon;
             }
 
             btnEle.innerText = "Đang tìm kiếm...";
@@ -71,61 +76,59 @@
                 if (data.status === "success") {
                     resultBox.className = "success-box";
                     
-                    // ==========================================
-                    // XỬ LÝ LOGIC TIỀN SHIP VÀ COD
-                    // ==========================================
-                    let paymentMethod = data.payment || "";
                     let balanceNum = Number(String(data.balance).replace(/[^0-9.-]+/g,"")); 
                     if (isNaN(balanceNum)) balanceNum = 0;
 
                     let paymentHtml = "";
-                    
-                    // Nếu là COD (Thanh toán khi nhận hàng) -> Cộng 14k ship và hiện ra
-                    if (paymentMethod.toUpperCase().includes("COD")) {
-                        let totalCOD = balanceNum + 14000;
-                        paymentHtml = `<br>💰 <b>Cần thanh toán (+Ship):</b> <span class="highlight-money">${totalCOD.toLocaleString('vi-VN')} VNĐ</span>`;
-                    } 
-                    // Nếu là Chuyển khoản -> paymentHtml rỗng (Không hiện dòng tiền)
+                    if (data.balance.toString().indexOf("Đã thanh toán") === -1) {
+                        if (data.payment.toUpperCase().includes("COD")) {
+                            let totalWithShip = balanceNum + 13000;
+                            paymentHtml = `<br>💰 <b>Cần trả (+13k ship):</b> <span class="highlight-money">${totalWithShip.toLocaleString('vi-VN')} VNĐ</span>`;
+                        } else {
+                            paymentHtml = `<br>💰 <b>Còn nợ:</b> <span class="highlight-money">${balanceNum.toLocaleString('vi-VN')} VNĐ</span>`;
+                        }
+                    } else {
+                        paymentHtml = `<br>💰 <b>Trạng thái:</b> <span style="color:green; font-weight:bold;">✅ Đã thanh toán</span>`;
+                    }
 
                     resultBox.innerHTML = `
-                        <div class="result-title" style="color: #1d4ed8; font-size: 16px;">🎉 Đơn hàng đã được gửi đi!</div>
+                        <div class="result-title" style="color: #1d4ed8; font-size: 16px;">🎉 Đã tìm thấy đơn!</div>
                         
                         <div class="order-info-box">
                             👤 <b>Người nhận:</b> ${data.name}<br>
-                            📞 <b>SĐT:</b> ${data.phone}<br>
                             🏠 <b>Địa chỉ:</b> ${data.address}<br>
-                            💳 <b>Hình thức:</b> ${paymentMethod}
+                            💳 <b>Thanh toán:</b> ${data.payment}
                             ${paymentHtml} 
                         </div>
 
-                        <div class="result-title" style="color: #64748b; margin-top: 20px;">Mã vận đơn của bạn:</div>
-                        <div class="tracking-code" id="trackingCodeText">${data.maVanDon}</div>
-                        <button class="copy-btn" onclick="copyCode()">📋 Copy mã</button>
+                        <div class="result-title" style="color: #64748b; margin-top: 15px;">Mã vận đơn:</div>
+                        <div class="tracking-code" id="trackingCodeText">${data.maVanDon || "Đang đóng gói..."}</div>
+                        ${data.maVanDon ? '<button class="copy-btn" onclick="copyCode()">📋 Copy mã</button>' : ''}
                     `;
                 } else if (data.status === "pending") {
                     resultBox.className = "pending-box";
                     resultBox.innerHTML = `
-                        <div class="result-title" style="color: #b45309;">⏳ Đang chuẩn bị hàng</div>
-                        <div style="font-size: 14px; color: #92400e; margin-top:5px;">${data.message}</div>
+                        <div class="result-title" style="color: #b45309;">⏳ Đang xử lý</div>
+                        <div style="font-size: 14px; color: #92400e;">${data.message}</div>
                     `;
                 } else {
                     resultBox.className = "error-box";
                     resultBox.innerHTML = `
-                        <div class="result-title" style="color: #b91c1c;">❌ Không tìm thấy</div>
-                        <div style="font-size: 14px; color: #991b1b; margin-top:5px;">${data.message}</div>
+                        <div class="result-title" style="color: #b91c1c;">❌ Không thấy đơn</div>
+                        <div style="font-size: 13px; color: #991b1b;">Vui lòng kiểm tra lại mã đơn hoặc liên hệ shop.</div>
                     `;
                 }
             } catch (error) {
                 btnEle.innerText = "Tra cứu ngay";
                 btnEle.disabled = false;
-                alert("Có lỗi mạng xảy ra, vui lòng thử lại sau!");
+                alert("Lỗi kết nối, vui lòng thử lại!");
             }
         }
 
         function copyCode() {
             const code = document.getElementById('trackingCodeText').innerText;
             navigator.clipboard.writeText(code).then(() => {
-                alert("✅ Đã copy mã vận đơn: " + code);
+                alert("✅ Đã copy mã vận đơn!");
             });
         }
     </script>
