@@ -32,8 +32,8 @@
         <h2>📦 Tra Cứu Đơn Hàng</h2>
         <p class="desc">Vui lòng nhập mã đơn để xem trạng thái</p>
         
-        <input type="text" id="orderInput" placeholder="VD: OD-123456">
-        <div class="note-mvd">Mã đơn của bạn là: OD- + 6 số cuối SĐT</div>
+        <input type="text" id="orderInput" placeholder="VD: OD123456">
+        <div class="note-mvd">Mã đơn của bạn là: OD + 6 số cuối SĐT</div>
         
         <button id="searchBtn" onclick="performSearch()">Tra cứu ngay</button>
 
@@ -57,8 +57,8 @@
                 return;
             }
             
-            if (!maDon.startsWith("OD-")) {
-                maDon = "OD-" + maDon;
+            if (!maDon.startsWith("OD")) {
+                maDon = "OD" + maDon;
                 inputEle.value = maDon;
             }
 
