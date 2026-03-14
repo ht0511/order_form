@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Xác nhận thông tin nhận hàng</title>
+    
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 20px 10px; color: #334155; }
         .container { max-width: 500px; margin: auto; }
@@ -28,13 +34,41 @@
         .order-id-box { background: #f8fafc; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #e2e8f0; }
         .order-id { font-size: 32px; font-weight: 800; color: #2563eb; }
         .last6-note { background: #fff7ed; color: #c2410c; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid #ffedd5; }
+
+        /* CSS TÙY CHỈNH CHO SELECT2 (Giao diện mượt như bản gốc) */
+        .select2-container .select2-selection--single {
+            height: 46px !important;
+            border-radius: 8px !important;
+            border: 1px solid #cbd5e1 !important;
+            display: flex !important;
+            align-items: center;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            margin-top: 5px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px !important;
+            right: 10px !important;
+        }
+        .select2-selection__rendered {
+            color: #334155 !important;
+            padding-left: 12px !important;
+            width: 100%;
+        }
+        .select2-search__field {
+            font-family: 'Inter', sans-serif;
+            outline: none !important;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #2563eb !important;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="clearfix">
-        <a href="tra-mvd.html" class="btn-tracuu">📦 Tra cứu vận đơn</a>
+        <a href="tra-cuu.html" class="btn-tracuu">📦 Tra cứu vận đơn</a>
     </div>
 
     <div class="card" id="formCard">
@@ -94,7 +128,6 @@
             </select>
             
             <div id="transferArea" style="display: none;">
-                
                 <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #cbd5e1; text-align: center;">
                     <p style="margin: 0 0 10px 0; font-weight: 600; color: #1e293b; font-size: 14px;">Thông tin chuyển khoản</p>
                     
@@ -149,7 +182,55 @@
     let submitted = false;
     let provincesData = [];
 
-    // HÀM LOẠI BỎ DẤU TIẾNG VIỆT CHO NỘI DUNG CHUYỂN KHOẢN
+    // ==========================================
+    // LOGIC ĐỊA CHỈ & TÌM KIẾM (Đã cập nhật Select2)
+    // ==========================================
+    async function loadAddress() {
+        const res = await fetch("https://provinces.open-api.vn/api/?depth=3");
+        provincesData = await res.json();
+        const pSelect = document.getElementById("province");
+        provincesData.forEach(p => pSelect.add(new Option(p.name, p.name)));
+        
+        // Kích hoạt tính năng gõ tìm kiếm
+        $('#province, #district, #ward').select2({
+            width: '100%'
+        });
+    }
+
+    // Khi thay đổi Tỉnh
+    $('#province').on('change', function() {
+        const dSelect = document.getElementById("district");
+        const wSelect = document.getElementById("ward");
+        dSelect.innerHTML = '<option value="">Chọn huyện</option>';
+        wSelect.innerHTML = '<option value="">Chọn xã</option>';
+        
+        const p = provincesData.find(x => x.name === this.value);
+        if (p) {
+            p.districts.forEach(d => dSelect.add(new Option(d.name, d.name)));
+        }
+        
+        // Cập nhật lại giao diện thả xuống
+        $('#district, #ward').trigger('change.select2');
+    });
+
+    // Khi thay đổi Huyện
+    $('#district').on('change', function() {
+        const wSelect = document.getElementById("ward");
+        wSelect.innerHTML = '<option value="">Chọn xã</option>';
+        
+        const p = provincesData.find(x => x.name === document.getElementById("province").value);
+        if(p) {
+            const d = p.districts.find(x => x.name === this.value);
+            if (d) d.wards.forEach(w => wSelect.add(new Option(w.name, w.name)));
+        }
+        
+        // Cập nhật lại giao diện thả xuống
+        $('#ward').trigger('change.select2');
+    });
+
+    // ==========================================
+    // CÁC HÀM CÒN LẠI (QR, TÍNH TIỀN, UPLOAD ẢNH...)
+    // ==========================================
     function removeVietnameseTones(str) {
         str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
         str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
@@ -165,44 +246,29 @@
         str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
         str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
         str = str.replace(/Đ/g, "D");
-        // Bỏ các ký tự đặc biệt có thể làm lỗi QR
         str = str.replace(/[^a-zA-Z0-9 ]/g, "");
         return str.trim();
     }
 
-    // HÀM CẬP NHẬT MÃ QR ĐỘNG MỚI NHẤT
     function updateQRCode() {
         const total = parseFloat(document.getElementById("total").value) || 0;
         const paid = parseFloat(document.getElementById("paid").value) || 0;
         const remain = total - paid;
         
-        // Tạo Mã đơn y hệt như trên Server
         const phone = document.getElementById("phone").value;
         let orderId = "";
-        if(phone.length >= 6) {
-            orderId = "OD-" + phone.slice(-6);
-        } else if(phone) {
-            orderId = "OD-" + phone;
-        }
+        if(phone.length >= 6) { orderId = "OD-" + phone.slice(-6); } 
+        else if(phone) { orderId = "OD-" + phone; }
 
-        // Lấy Tên FB/Zalo và lọc bỏ dấu tiếng Việt
         let accountName = document.getElementById("account").value;
         accountName = removeVietnameseTones(accountName);
 
-        // Ghép nội dung: OD-123456 NGUYEN VAN A chuyen khoan
         let addInfo = "";
-        if(orderId || accountName) {
-            addInfo = `${orderId} ${accountName} chuyen khoan`.trim();
-        } else {
-            addInfo = "Thanh toan don hang";
-        }
+        if(orderId || accountName) { addInfo = `${orderId} ${accountName} chuyen khoan`.trim(); } 
+        else { addInfo = "Thanh toan don hang"; }
         
         let qrUrl = `https://img.vietqr.io/image/BIDV-3149103611-compact2.png?accountName=BUI%20THI%20HOAI%20THUONG`;
-        
-        if (remain > 0) {
-            qrUrl += `&amount=${remain}&addInfo=${encodeURIComponent(addInfo)}`;
-        }
-        
+        if (remain > 0) { qrUrl += `&amount=${remain}&addInfo=${encodeURIComponent(addInfo)}`; }
         document.getElementById("qrCodeImg").src = qrUrl;
     }
 
@@ -269,9 +335,7 @@
         const remain = total - paid;
         document.getElementById("remain_text").innerText = remain.toLocaleString('vi-VN');
         
-        if (document.getElementById("payment").value === "Chuyển khoản") {
-            updateQRCode();
-        }
+        if (document.getElementById("payment").value === "Chuyển khoản") { updateQRCode(); }
     }
 
     function validatePhone(input) {
@@ -288,9 +352,7 @@
     function togglePaymentNote() {
         const paymentMethod = document.getElementById("payment").value;
         document.getElementById("transferArea").style.display = (paymentMethod === "Chuyển khoản") ? "block" : "none";
-        if (paymentMethod === "Chuyển khoản") {
-            updateQRCode();
-        }
+        if (paymentMethod === "Chuyển khoản") { updateQRCode(); }
     }
 
     function handleSubmit() {
@@ -339,30 +401,7 @@
         window.scrollTo(0, 0);
     }
 
-    async function loadAddress() {
-        const res = await fetch("https://provinces.open-api.vn/api/?depth=3");
-        provincesData = await res.json();
-        const pSelect = document.getElementById("province");
-        provincesData.forEach(p => pSelect.add(new Option(p.name, p.name)));
-    }
-
-    document.getElementById("province").onchange = function() {
-        const dSelect = document.getElementById("district");
-        const wSelect = document.getElementById("ward");
-        dSelect.innerHTML = '<option value="">Chọn huyện</option>';
-        wSelect.innerHTML = '<option value="">Chọn xã</option>';
-        const p = provincesData.find(x => x.name === this.value);
-        if (p) p.districts.forEach(d => dSelect.add(new Option(d.name, d.name)));
-    };
-
-    document.getElementById("district").onchange = function() {
-        const wSelect = document.getElementById("ward");
-        wSelect.innerHTML = '<option value="">Chọn xã</option>';
-        const p = provincesData.find(x => x.name === document.getElementById("province").value);
-        const d = p.districts.find(x => x.name === this.value);
-        if (d) d.wards.forEach(w => wSelect.add(new Option(w.name, w.name)));
-    };
-
+    // Khởi chạy API lấy danh sách địa chỉ
     loadAddress();
 </script>
 </body>
