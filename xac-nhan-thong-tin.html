@@ -23,15 +23,16 @@
         textarea { resize: vertical; min-height: 80px; }
         .total-box { background: #eff6ff; padding: 15px; border-radius: 10px; margin: 15px 0; font-weight: 600; text-align: center; color: #1d4ed8; border: 1px dashed #3b82f6; }
         .ship-note { font-size: 12px; color: #0369a1; margin-top: 5px; font-weight: 400; }
+        .highlight-red { color: #dc2626; font-size: 18px; }
         button { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; transition: 0.3s;}
         button:hover { background: #1d4ed8; }
         button:disabled { background: #cbd5e1; cursor: not-allowed; }
         .success { display: none; text-align: center; padding: 30px 20px; }
         .order-id-box { background: #f8fafc; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #e2e8f0; }
         .order-id { font-size: 32px; font-weight: 800; color: #2563eb; }
+        /* Select2 Custom */
         .select2-container .select2-selection--single { height: 46px !important; border-radius: 8px !important; border: 1px solid #cbd5e1 !important; display: flex !important; align-items: center; margin-top: 5px; }
         .select2-container--default .select2-selection--single .select2-selection__arrow { height: 44px !important; }
-        .select2-selection__rendered { color: #334155 !important; padding-left: 12px !important; }
     </style>
 </head>
 <body>
@@ -52,22 +53,12 @@
 
             <label>Số điện thoại (10 số)</label>
             <input name="phone" id="phone" type="tel" placeholder="0912345678" maxlength="10" required oninput="validatePhone(this); updateQRCode();">
-            <span id="phoneError" style="color: #dc2626; font-size: 11px; display: none; margin-top: 4px;"></span>
-
-            <label>Tỉnh / Thành phố</label>
+            
+            <label>Địa chỉ nhận hàng</label>
             <select name="province" id="province" required><option value="">Chọn tỉnh</option></select>
-
-            <label>Quận / Huyện</label>
             <select name="district" id="district" required><option value="">Chọn huyện</option></select>
-
-            <label>Phường / Xã</label>
             <select name="ward" id="ward" required><option value="">Chọn xã</option></select>
-
-            <label>Địa chỉ chi tiết</label>
             <input name="address" required placeholder="Số nhà, tên đường...">
-
-            <label>Order qua đâu?</label>
-            <select name="source"><option>Facebook</option><option>Zalo</option></select>
 
             <label>Tên FB / Zalo đã order</label>
             <input name="account" id="account" required placeholder="Ví dụ: Thùy Trang" oninput="updateQRCode()">
@@ -75,20 +66,19 @@
             <hr style="margin-top: 25px; border: 0; border-top: 1px solid #eee;">
 
             <label>Tổng tiền hàng (VNĐ)</label>
-            <input type="tel" id="total_input" inputmode="numeric" placeholder="Ví dụ: 500000" oninput="handleMoneyInput(this, 'total', 'total_text')" onblur="formatOnBlur(this)">
+            <input type="tel" id="total_input" inputmode="numeric" placeholder="Ví dụ: 500000" oninput="handleMoneyInput(this, 'total')" onblur="formatOnBlur(this)">
             <input type="hidden" name="total" id="total">
-            <div id="total_text" style="font-size: 12px; color: #64748b; margin-top: 4px; font-style: italic;"></div>
             
-            <label>Số tiền đã chuyển khoản (VNĐ)</label>
-            <input type="tel" id="paid_input" inputmode="numeric" placeholder="Nhập 0 nếu chưa trả" oninput="handleMoneyInput(this, 'paid', 'paid_text')" onblur="formatOnBlur(this)">
+            <label>Số tiền đã chuyển khoản/cọc (VNĐ)</label>
+            <input type="tel" id="paid_input" inputmode="numeric" placeholder="Nhập 0 nếu chưa trả" oninput="handleMoneyInput(this, 'paid')" onblur="formatOnBlur(this)">
             <input type="hidden" name="paid" id="paid">
-            <div id="paid_text" style="font-size: 12px; color: #64748b; margin-top: 4px; font-style: italic;"></div>
             
             <div class="total-box">
-                Số tiền còn lại: <span id="remain_text">0</span> VNĐ + Ship
+                Tổng cần trả (+14k ship): <br>
+                <span class="highlight-red" id="remain_text">0</span> VNĐ
             </div>
 
-            <label>Thanh toán phần còn lại qua</label>
+            <label>Hình thức thanh toán phần còn lại</label>
             <select name="payment" id="payment" onchange="togglePaymentNote()">
                 <option value="COD">COD (Thanh toán khi nhận hàng)</option>
                 <option value="Chuyển khoản">Chuyển khoản</option>
@@ -96,16 +86,12 @@
             
             <div id="transferArea" style="display: none;">
                 <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #cbd5e1; text-align: center;">
-                    <p style="margin: 0 0 10px 0; font-weight: 600; color: #1e293b; font-size: 14px;">Quét mã QR để thanh toán tự động</p>
-                    
-                    <img id="qrCodeImg" src="https://qr.sepay.vn/img?acc=96247HT0511&bank=BIDV&template=compact2" alt="Mã QR SePay" style="width: 220px; height: 220px; object-fit: contain; border-radius: 8px; border: 1px solid #e2e8f0; background: white; padding: 5px;">
+                    <p style="margin: 0 0 10px 0; font-weight: 600; color: #1e293b; font-size: 14px;">Quét mã QR để thanh toán (Đã cộng ship)</p>
+                    <img id="qrCodeImg" src="" alt="Mã QR SePay" style="width: 220px; height: 220px; object-fit: contain; border-radius: 8px; border: 1px solid #e2e8f0; background: white; padding: 5px;">
                     <br>
-                    <button type="button" onclick="downloadQR()" style="width: auto; padding: 8px 15px; background: #e2e8f0; color: #475569; border-radius: 6px; font-size: 12px; margin-top: 10px; border:none; cursor:pointer;">📥 Tải mã QR</button>
-                    
                     <div style="text-align: left; font-size: 13px; margin-top: 15px; background: white; padding: 10px; border-radius: 6px; border: 1px dashed #94a3b8;">
-                        🏦 Ngân hàng: <b>BIDV </b><br>
-                        👤 Chủ TK: <b>BUI THI HOAI THUONG</b><br>
-                        💳 Số TK: <b style="color: #2563eb; font-size: 15px;">96247HT0511</b>
+                        🏦 BIDV: <b>96247HT0511</b><br>
+                        👤 Chủ TK: <b>BUI THI HOAI THUONG</b>
                     </div>
                 </div>
 
@@ -113,8 +99,6 @@
                     📢 Tải lên ảnh Bill chuyển khoản:
                     <input type="file" id="imageFile" accept="image/*" onchange="encodeImageFileAsURL(this)" style="margin-top: 10px;">
                     <input type="hidden" name="imageBase64" id="imageBase64">
-                    <input type="hidden" name="imageName" id="imageName">
-                    <div id="uploadStatus" style="font-size: 11px; color: #059669; margin-top: 5px;"></div>
                 </div>
             </div>
 
@@ -122,14 +106,14 @@
         </form>
     </div>
 
-    <div class="card success" id="successCard" style="display:none; text-align:center; padding:30px;">
+    <div class="card success" id="successCard" style="display:none; text-align:center;">
         <div style="font-size: 50px;">✅</div>
         <h2>Gửi đơn thành công!</h2>
         <div class="order-id-box">
-            <p style="margin:0; font-size:13px; color:#64748b;">Mã đơn của bạn:</p>
-            <div class="order-id" id="displayOrderId" style="font-size:32px; font-weight:800; color:#2563eb;"></div>
+            <p style="margin:0; font-size:13px;">Mã đơn của bạn:</p>
+            <div class="order-id" id="displayOrderId"></div>
         </div>
-        <button onclick="location.reload()" style="background: #94a3b8; width:100%; padding:15px; border-radius:8px; color:white; border:none; cursor:pointer;">Quay lại</button>
+        <button onclick="location.reload()" style="background: #94a3b8; color:white; padding:15px; border:none; border-radius:8px; width:100%;">Quay lại</button>
     </div>
 </div>
 
@@ -138,23 +122,48 @@
 <script>
     let submitted = false;
     let provincesData = [];
+    const SHIP_FEE = 14000;
 
     function updateQRCode() {
         const total = parseFloat(document.getElementById("total").value) || 0;
         const paid = parseFloat(document.getElementById("paid").value) || 0;
-        const remain = total - paid;
+        
+        // CỘNG 14K SHIP VÀO QR LUÔN
+        const remainWithShip = (total - paid) + SHIP_FEE;
+        
         const phone = document.getElementById("phone").value;
         const orderId = phone.length >= 6 ? "OD-" + phone.slice(-6) : "OD-" + phone;
 
-        // SỬ DỤNG STK 96247HT0511 TRỰC TIẾP TRONG LINK QR
         let qrUrl = `https://qr.sepay.vn/img?acc=96247HT0511&bank=BIDV&template=compact2`;
         
-        if (remain > 0) {
-            qrUrl += `&amount=${remain}&des=${encodeURIComponent(orderId)}`;
+        if (remainWithShip > 0) {
+            qrUrl += `&amount=${remainWithShip}&des=${encodeURIComponent(orderId)}`;
         } else {
             qrUrl += `&des=${encodeURIComponent(orderId)}`;
         }
         document.getElementById("qrCodeImg").src = qrUrl;
+    }
+
+    function handleMoneyInput(input, hiddenId) {
+        let value = input.value.replace(/\D/g, ""); 
+        input.value = value; 
+        document.getElementById(hiddenId).value = value;
+        calcRemain();
+    }
+
+    function calcRemain() {
+        const total = parseFloat(document.getElementById("total").value) || 0;
+        const paid = parseFloat(document.getElementById("paid").value) || 0;
+        
+        // HIỂN THỊ SỐ TIỀN ĐÃ CỘNG SHIP
+        const remainWithShip = (total - paid) + SHIP_FEE;
+        
+        document.getElementById("remain_text").innerText = remainWithShip > 0 ? remainWithShip.toLocaleString('vi-VN') : "0";
+        if (document.getElementById("payment").value === "Chuyển khoản") updateQRCode();
+    }
+
+    function formatOnBlur(input) { 
+        if (input.value) input.value = Number(input.value.replace(/\D/g, "")).toLocaleString('vi-VN'); 
     }
 
     async function loadAddress() {
@@ -182,46 +191,32 @@
         $('#ward').trigger('change.select2');
     });
 
-    function handleMoneyInput(input, hiddenId, textId) {
-        let value = input.value.replace(/\D/g, ""); 
-        input.value = value; 
-        document.getElementById(hiddenId).value = value;
-        calcRemain();
-    }
-    function formatOnBlur(input) { if (input.value) input.value = Number(input.value.replace(/\D/g, "")).toLocaleString('vi-VN'); }
-    function calcRemain() {
-        const total = parseFloat(document.getElementById("total").value) || 0;
-        const paid = parseFloat(document.getElementById("paid").value) || 0;
-        const remain = total - paid;
-        document.getElementById("remain_text").innerText = remain.toLocaleString('vi-VN');
-        if (document.getElementById("payment").value === "Chuyển khoản") updateQRCode();
-    }
     function validatePhone(input) {
         input.value = input.value.replace(/\D/g, '').substring(0, 10);
         if (input.value.length > 0 && input.value[0] !== '0') input.value = '';
     }
+
     function togglePaymentNote() {
         document.getElementById("transferArea").style.display = (document.getElementById("payment").value === "Chuyển khoản") ? "block" : "none";
         if (document.getElementById("payment").value === "Chuyển khoản") updateQRCode();
     }
+
     function encodeImageFileAsURL(element) {
         let file = element.files[0];
         if (file) {
             let reader = new FileReader();
-            reader.onloadend = function() {
-                document.getElementById("imageBase64").value = reader.result;
-                document.getElementById("imageName").value = file.name;
-                document.getElementById("uploadStatus").innerText = "✔️ Đã nhận ảnh!";
-            }
+            reader.onloadend = function() { document.getElementById("imageBase64").value = reader.result; }
             reader.readAsDataURL(file);
         }
     }
+
     function handleSubmit() {
         submitted = true;
         document.getElementById("submitBtn").innerText = "Đang gửi...";
         document.getElementById("submitBtn").disabled = true;
         return true;
     }
+
     function showSuccess() {
         const phone = document.getElementById("phone").value;
         document.getElementById("displayOrderId").innerText = "OD-" + phone.slice(-6);
@@ -229,15 +224,7 @@
         document.getElementById("successCard").style.display = "block";
         window.scrollTo(0, 0);
     }
-    async function downloadQR() {
-        const imgUrl = document.getElementById("qrCodeImg").src;
-        const response = await fetch(imgUrl);
-        const blob = await response.blob();
-        const a = document.createElement("a");
-        a.href = window.URL.createObjectURL(blob);
-        a.download = "QR_SePay.png";
-        a.click();
-    }
+
     loadAddress();
 </script>
 </body>
