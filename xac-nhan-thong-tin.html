@@ -232,12 +232,41 @@
         if (document.getElementById("payment").value === "Chuyển khoản") updateQRCode();
     }
 
-    function handleSubmit() {
-        submitted = true;
-        document.getElementById("submitBtn").innerText = "Đang gửi...";
-        document.getElementById("submitBtn").disabled = true;
-        return true;
+    async function handleSubmit() {
+    const btn = document.getElementById("submitBtn");
+    btn.innerText = "Đang gửi...";
+    btn.disabled = true;
+
+    // Lấy dữ liệu từ Form
+    const form = document.getElementById("orderForm");
+    const formData = new FormData(form);
+    
+    // Chuyển FormData thành URLSearchParams để gửi dạng Form truyền thống
+    const data = new URLSearchParams();
+    for (const pair of formData) {
+        data.append(pair[0], pair[1]);
     }
+
+    try {
+        // Gửi dữ liệu bằng fetch (Thay URL bằng URL Web App của bạn)
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: data,
+            mode: 'no-cors' // Quan trọng để tránh lỗi CORS của Google
+        });
+
+        // Với mode 'no-cors', chúng ta không đọc được nội dung trả về 
+        // nhưng nếu không có lỗi crash thì coi như gửi thành công
+        showSuccess();
+    } catch (error) {
+        console.error("Lỗi:", error);
+        alert("Có lỗi xảy ra khi gửi đơn. Vui lòng thử lại hoặc liên hệ Zalo shop!");
+        btn.innerText = "Xác nhận đơn hàng";
+        btn.disabled = false;
+    }
+
+    return false; // Ngăn form load lại trang theo kiểu cũ
+}
 
     function showSuccess() {
         const name = document.getElementById("name").value;
