@@ -55,7 +55,7 @@
         <h2>Xác nhận thông tin</h2>
         <p class="desc">Vui lòng điền đúng thông tin để shop gửi hàng</p>
 
-        <form id="orderForm" action="https://script.google.com/macros/s/AKfycby_NiGaDCBnA8t24jzN61cVMUA2hinNEVWbklx6_7O_TlaCKdPniB7HgEDT6UMkrWkc/exec" method="POST" target="hidden_iframe" onsubmit="return handleSubmit()">
+        <form id="orderForm" action="https://script.google.com/macros/s/AKfycbz0LuIro39V0FcmErGiTuPmiqrYZEElT1QOP-uRO2q8QCrfUyn6r-yYslz08Ig5pVw/exec" method="POST" onsubmit="handleSubmit(event)">
             
             <label>Tên người nhận hàng</label>
             <input name="name" id="name" placeholder="Nguyễn Văn A" required>
@@ -232,40 +232,42 @@
         if (document.getElementById("payment").value === "Chuyển khoản") updateQRCode();
     }
 
-    async function handleSubmit() {
+    async function handleSubmit(event) {
+    event.preventDefault(); // CHẶN GỬI FORM TRUYỀN THỐNG - BẮT BUỘC
+
     const btn = document.getElementById("submitBtn");
-    btn.innerText = "Đang gửi...";
+    const originalText = btn.innerText;
+    btn.innerText = "⏳ Đang gửi...";
     btn.disabled = true;
 
-    // Lấy dữ liệu từ Form
     const form = document.getElementById("orderForm");
     const formData = new FormData(form);
     
-    // Chuyển FormData thành URLSearchParams để gửi dạng Form truyền thống
+    // Chuyển sang URLSearchParams để Google Script nhận được e.parameter
     const data = new URLSearchParams();
     for (const pair of formData) {
         data.append(pair[0], pair[1]);
     }
 
     try {
-        // Gửi dữ liệu bằng fetch (Thay URL bằng URL Web App của bạn)
-        const response = await fetch(form.action, {
+        await fetch(form.action, {
             method: "POST",
             body: data,
-            mode: 'no-cors' // Quan trọng để tránh lỗi CORS của Google
+            mode: 'no-cors' // Để vượt qua lỗi CORS
         });
 
-        // Với mode 'no-cors', chúng ta không đọc được nội dung trả về 
-        // nhưng nếu không có lỗi crash thì coi như gửi thành công
-        showSuccess();
+        // Đợi 500ms để đảm bảo lệnh gửi đã đi
+        setTimeout(() => {
+            showSuccess();
+        }, 500);
+        
     } catch (error) {
         console.error("Lỗi:", error);
-        alert("Có lỗi xảy ra khi gửi đơn. Vui lòng thử lại hoặc liên hệ Zalo shop!");
-        btn.innerText = "Xác nhận đơn hàng";
+        alert("Không thể gửi đơn. Vui lòng kiểm tra mạng hoặc liên hệ Shop!");
+        btn.innerText = originalText;
         btn.disabled = false;
     }
-
-    return false; // Ngăn form load lại trang theo kiểu cũ
+}
 }
 
     function showSuccess() {
